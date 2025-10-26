@@ -1,26 +1,30 @@
 
-import { createBrowserRouter, Route, RouterProvider } from 'react-router-dom'
+import { BrowserRouter as Router } from 'react-router-dom'
 import './App.css'
-import Login from './componants/Login/Login'
-import UserData from './componants/userData/UserData'
-import LoadingScreen from './componants/Loadingscreen/Loadingscreen'
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+import AuthProvider from './contexts/AuthContexts'
+import RouterComponent from './Router/AppRouter'
+
 
 function App() {
-  
-const router = createBrowserRouter([{
-path:"/",
-element:<Login />,
-},
-{
-  path:"/userData",
-  element:<UserData />,
-},
-{
-  path:"/loading",
-  element:<LoadingScreen />,
-}])
+
   return<>
-   <RouterProvider router={router} />
+  <Router>
+    <AuthProvider>
+      <RouterComponent />
+       <ToastContainer
+      position="top-center"
+      autoClose={3000}
+      hideProgressBar={false}
+      newestOnTop
+      closeOnClick
+      pauseOnHover
+      theme="light"
+    />
+    </AuthProvider>
+  </Router>
   </>
   
 }
