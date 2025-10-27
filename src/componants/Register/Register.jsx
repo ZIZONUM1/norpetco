@@ -28,7 +28,7 @@ const Register = () => {
         setLoading(true);
         const data = await authAPI.signup(values);
         toast.success("تم التسجيل بنجاح 🎉");
-        login(data.token , data.data.role);
+        login(data.token , data.data);
       } catch (err) {
         toast.error(err.response?.data?.message || "❌ فشل التسجيل");
       } finally {

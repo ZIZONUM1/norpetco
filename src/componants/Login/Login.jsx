@@ -30,7 +30,7 @@ const Login = () => {
       try {
         const res = await authAPI.login(values);
         // ✅ خزّن البيانات
-        login(res.token , res.data.role);
+        login(res.token , res.data);
         toast.success("success ✔")
       } catch (err) {
         toast.error(err.response?.data?.message || "❌ فشل التسجيل");
