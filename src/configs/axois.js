@@ -1,5 +1,5 @@
 import axios from "axios";
-const baseURL = import.meta.env.VITE_API_BASE_URL;
+const baseURL = import.meta.env.VITE_API_BASE_URL || "http://105.197.6.139:4000/api/v1";
 const api = axios.create({
   baseURL, // replace with your API base URL
   timeout: 10000, // 10s timeout
