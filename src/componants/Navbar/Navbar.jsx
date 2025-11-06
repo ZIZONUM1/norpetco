@@ -12,8 +12,8 @@ const Navbar = () => {
 
   // ✅ Tabs خاصة بصفحة add-stuf فقط
   const tabs = [
-    { title: "إدارة الموظفين", path: "/admin-panel/national-ids" },
-    { title: "سجل الرواتب", path: "/admin-panel/statistics" },
+    { title: "اضافه السجلات", path: "/admin-panel/national-ids" },
+    { title: "اداره الموظفين", path: "/admin-panel/statistics" },
   ];
 
   const handleTabClick = (title) => {

@@ -1,16 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { authAPI, nationalIDAPI, statisticsAPI } from "../../configs/apis";
 import { toast } from "react-toastify";
 import { systemRoles } from "../../utils/systemRoles";
 
-const FileUploader = ({ formType }) => {
+const FileUploader = () => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedModel , setSelectedModel] = useState(null);
+  const [typeOfEstekta3at , setTypeOfEstekta3at] = useState(null);
   const [role, setRole] = useState(systemRoles.EMPLOYEE);
+  const selectedFileRef = useRef(null);
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
-
+   console.log(selectedFileRef.current?.value);
+   
+    
     const validTypes = [
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.ms-excel",
@@ -34,14 +39,14 @@ const FileUploader = ({ formType }) => {
 
     const formData = new FormData();
     formData.append("file", file);
-    if(formType === "nationalID") formData.append("role" , role);
+    
     try {
       let data;
 
-      if(formType === "nationalID"){
-        data = await nationalIDAPI.addNationalIDs(formData);
-      }else{
+      if (selectedFileRef.current?.value === 'الراتب الشهري') {
         data = await statisticsAPI.addStatistics(formData);
+      } else {
+        data = await nationalIDAPI.addNationalID(formData);
       }
       console.log(data);
 
@@ -57,18 +62,27 @@ const FileUploader = ({ formType }) => {
     <div className="flex justify-center items-center min-h-screen">
       <form encType="multipart/form-data" className="flex flex-col items-center justify-center space-y-4 p-6 bg-white shadow-md rounded-lg w-full max-w-sm mx-auto">
         <h2 className="text-lg font-semibold text-gray-700">Upload Excel File</h2>
-        {formType === "nationalID" && <div className="w-full">
-          <select
-            name="role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
+        
+         <select
+            name="model"
+            ref={selectedFileRef}
             className="w-full p-2 mb-2 rounded-md border border-gray-300 focus:outline-none"
           >
-            <option value={systemRoles.ADMIN}>أدمن</option>
-            <option value={systemRoles.EMPLOYEE}>موظف</option>
+            <option value={'الراتب الشهري'}>الراتب الشهري</option>
+            <option value={'الراتب النصف شهري'}>الراتب النصف شهري</option> 
+            <option value={'الاستقطاعات'}> الاستقطاعات </option> 
           </select>
-        </div>}
-        <input
+       {selectedModel==="الاستقطاعات" && <select
+            name="typeOfEstekta3at"
+            value={typeOfEstekta3at}
+            onChange={(e) => setTypeOfEstekta3at(e.target.value)}
+            className="w-full p-2 mb-2 rounded-md border border-gray-300 focus:outline-none"
+          >
+            <option value={'الاستقطاعات الشهريه'}>الاستقطاعات الشهريه</option>
+            <option value={'الاستقطاعات النصف الشهريه'}>الاستقطاعات النصف الشهريه</option>
+          
+          </select>}
+       <input
           type="file"
           accept=".xlsx,.xls"
           onChange={handleFileChange}

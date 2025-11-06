@@ -16,32 +16,53 @@ export default function UserData() {
   const { token, logout, userData } = useAuth();
   const [userDataArr, setUserDataArr] = useState(null);
 
+  // ✅ بيانات الشهر المصفاة
+  const [filteredData, setFilteredData] = useState(null);
+
+  // ✅ حالة التحميل أثناء الفلترة
+  const [loading, setLoading] = useState(false);
+
   const getUserStatistics = async () => {
     try {
-      const decoadedToken = jwtDecode(token);
-      const { id } = decoadedToken;
-      const data = await statisticsAPI.getStatistics(userData.stafManNumber);
+
+      // const decoadedToken = jwtDecode(token);
+      // const { id } = decoadedToken;
+      const data = await statisticsAPI.getStatistics('00007');
+      console.log(data);
+      
       setUserDataArr(data.data);
     } catch (error) {
       console.log(error);
     }
   };
 
+  // ✅ تحديث دالة الفلترة لتخزين النتيجة
   const filterFunction = () => {
-    const filterd = userDataArr?.find((item) => {
-      return (
-        new Date(item["الشهر"]).getMonth() ===
-          new Date(selectedDate).getMonth() &&
-        new Date(item["الشهر"]).getFullYear() ===
-          new Date(selectedDate).getFullYear()
-      );
-    });
-    console.log(filterd);
+    setLoading(true);
+    setTimeout(() => {
+      const filtered = userDataArr?.find((item) => {
+        return (
+          new Date(item["الشهر"]).getMonth() ===
+            new Date(selectedDate).getMonth() &&
+          new Date(item["الشهر"]).getFullYear() ===
+            new Date(selectedDate).getFullYear()
+        );
+      });
+      setFilteredData(filtered || null);
+      setLoading(false);
+    }, 400); // تأخير بسيط لإظهار الـ spinner بسلاسة
   };
 
   useEffect(() => {
     getUserStatistics();
   }, []);
+
+  // ✅ بعد تحميل البيانات، فلترة الشهر الحالي
+  useEffect(() => {
+    if (userDataArr) {
+      filterFunction();
+    }
+  }, [userDataArr]);
 
   useEffect(() => {
     filterFunction();
@@ -138,11 +159,8 @@ export default function UserData() {
                   <span className="font-semibold text-gray-900">
                     {userDataArr[0]["رقم العامل"]}
                   </span>
-               
                 </p>
-                   <span className="font-semibold text-gray-900">
-                   محاسب
-                  </span>
+                <span className="font-semibold text-gray-900">محاسب</span>
               </div>
               <img
                 src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
@@ -158,95 +176,115 @@ export default function UserData() {
               <h3 className="text-2xl font-semibold text-gray-800 mb-4">
                 تفاصيل الراتب
               </h3>
+<span className="font-semibold ml-2 text-gray-500">اختر الشهر والسنه</span>
+              <DatePicker
+                selected={selectedDate}
+                onChange={(date) => setSelectedDate(date)}
+                dateFormat="MM/yyyy"
+                showMonthYearPicker
+                locale="ar"
+                className="border border-gray-300 rounded-lg px-4 py-2 text-right w-48 focus:outline-none focus:ring-2 focus:ring-yellow-400 mb-4"
+                calendarClassName="!rtl text-right"
+              />
 
-              {/* ===== جدول الراتب ===== */}
-              <div className="overflow-x-auto mt-6">
-                <table className="min-w-full border border-gray-300 rounded-2xl shadow-md overflow-hidden text-sm md:text-base">
-                  <thead className="bg-yellow-100 text-gray-800 font-bold">
-                    <tr>
-                      <th className="border border-gray-300 px-3 md:px-4 py-3 whitespace-nowrap">
-                        البند
-                      </th>
-                      <th className="border border-gray-300 px-3 md:px-4 py-3 whitespace-nowrap w-auto">
-                        القيمة
-                      </th>
-                      <th className="border border-gray-300 px-3 md:px-4 py-3 whitespace-nowrap w-auto">
-                        القسط
-                      </th>
-                    </tr>
-                  </thead>
+              
+              {loading ? (
+                <div className="flex justify-center items-center py-10">
+                  <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-yellow-400 border-solid"></div>
+                </div>
+              ) : filteredData ? (
+                <div className="overflow-x-auto mt-6">
+                  <table className="min-w-full border border-gray-300 rounded-2xl shadow-md overflow-hidden text-sm md:text-base">
+                    <thead className="bg-yellow-100 text-gray-800 font-bold">
+                      <tr>
+                        <th className="border border-gray-300 px-3 md:px-4 py-3 whitespace-nowrap">
+                          البند
+                        </th>
+                        <th className="border border-gray-300 px-3 md:px-4 py-3 whitespace-nowrap w-auto">
+                          القيمة
+                        </th>
+                        <th className="border border-gray-300 px-3 md:px-4 py-3 whitespace-nowrap w-auto">
+                          الاستقطاعات
+                        </th>
+                      </tr>
+                    </thead>
 
-                  <tbody className="text-gray-700">
-                    {Object.entries(userDataArr[0])
-                      .sort(([aKey], [bKey]) => {
-                        const aIndex = order.indexOf(aKey);
-                        const bIndex = order.indexOf(bKey);
-                        if (aIndex === -1 && bIndex === -1) return 0;
-                        if (aIndex === -1) return 1;
-                        if (bIndex === -1) return -1;
-                        return aIndex - bIndex;
-                      })
-                      .map(([key, value], index) => {
-                        if (
-                          key === "إســــــم العــــــامل" ||
-                          key === "رقم العامل" ||
-                          key === "الشهر" ||
-                          ["_id", "__v", "createdAt", "updatedAt", "دعم ص"].includes(
-                            key
+                    <tbody className="text-gray-700">
+                      {Object.entries(filteredData)
+                        .sort(([aKey], [bKey]) => {
+                          const aIndex = order.indexOf(aKey);
+                          const bIndex = order.indexOf(bKey);
+                          if (aIndex === -1 && bIndex === -1) return 0;
+                          if (aIndex === -1) return 1;
+                          if (bIndex === -1) return -1;
+                          return aIndex - bIndex;
+                        })
+                        .map(([key, value], index) => {
+                          if (
+                            key === "إســــــم العــــــامل" ||
+                            key === "رقم العامل" ||
+                            key === "الشهر" ||
+                            [
+                              "_id",
+                              "__v",
+                              "createdAt",
+                              "updatedAt",
+                              "id",
+                              "token",
+                              "دعم ص",
+                              "staf",
+                            ].includes(key)
                           )
-                        )
-                          return null;
+                            return null;
 
-                        const isTotal =
-                          key.includes("إجمالى") || key.includes("صافى");
+                          const isTotal =
+                            key.includes("إجمالى") || key.includes("صافى");
 
-                        const displayValue =
-                          typeof value === "object"
-                            ? Object.entries(value)
-                                .map(([subKey, subValue]) => `${subKey}: ${subValue}`)
-                                .join(" | ")
-                            : value;
+                          const displayValue =
+                            typeof value === "object"
+                              ? Object.entries(value)
+                                  .map(
+                                    ([subKey, subValue]) =>
+                                      `${subKey}: ${subValue}`
+                                  )
+                                  .join(" | ")
+                              : value;
 
-                        const isQest = qestFields.some((f) => key.includes(f));
+                          const isQest = qestFields.some((f) =>
+                            key.includes(f)
+                          );
 
-                        return (
-                          <tr
-                            key={index}
-                            className={`${
-                              isTotal
-                                ? "bg-red-50 text-red-600 font-bold"
-                                : index % 2 === 0
-                                ? "bg-white"
-                                : "bg-gray-50"
-                            }`}
-                          >
-                            <td className="border border-gray-300 px-3 md:px-4 py-3 font-medium whitespace-nowrap">
-                              {key}
-                            </td>
-
-                            {/* عمود القيمة */}
-                            <td className="border border-gray-300 px-3 md:px-4 py-3 text-center align-middle">
-                              {!isQest ? displayValue : "-"}
-                            </td>
-
-                            {/* عمود القسط */}
-                            <td className="border border-gray-300 px-3 md:px-4 py-3 text-center align-middle">
-                              {isQest ? displayValue : "-"}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* ===== أسفل الصفحة ===== */}
-            <div className="flex flex-col sm:flex-row justify-between items-center mt-8 text-gray-700 text-base md:text-lg">
-              <div>
-                <span>آخر دفعة:</span>
-                <span className="mr-2 font-semibold">٣٠ سبتمبر</span>
-              </div>
+                          return (
+                            <tr
+                              key={index}
+                              className={`${
+                                isTotal
+                                  ? "bg-red-50 text-red-600 font-bold"
+                                  : index % 2 === 0
+                                  ? "bg-white"
+                                  : "bg-gray-50"
+                              }`}
+                            >
+                              <td className="border border-gray-300 px-3 md:px-4 py-3 font-medium whitespace-nowrap">
+                                {key}
+                              </td>
+                              <td className="border border-gray-300 px-3 md:px-4 py-3 text-center align-middle">
+                                {!isQest ? displayValue : "-"}
+                              </td>
+                              <td className="border border-gray-300 px-3 md:px-4 py-3 text-center align-middle">
+                                {isQest ? displayValue : "-"}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center text-gray-600 text-lg mt-10">
+                  لا يوجد سجل راتب لهذا الشهر
+                </div>
+              )}
             </div>
           </div>
         </div>

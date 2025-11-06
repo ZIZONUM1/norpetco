@@ -3,7 +3,7 @@ import api from "./axois";
 export const authAPI = {
     authPath:'/users',
     login: (data) => api.post(`${authAPI.authPath}/login`, data),
-    signup: (data) => api.post(`${authAPI.authPath}/signup`, data),
+    
   logout: () => api.post(`${authAPI.basePath}/logout`),
   getEmployees: () => api.get(`${authAPI.basePath}/get-employees`),
   resetPassword: (id, data) =>

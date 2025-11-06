@@ -3,7 +3,7 @@ import FileUploader from '../FileUploader/FileUploader'
 
 const StatisticsForm = () => {
   return (
-    <FileUploader formType={'other'}/>
+    <FileUploader />
   )
 }
 

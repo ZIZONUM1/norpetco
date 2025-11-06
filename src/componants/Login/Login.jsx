@@ -93,16 +93,7 @@ const Login = () => {
             تسجيل الدخول
           </button>
 
-          {/* Link to Register */}
-          <p className="text-center mt-4 text-sm text-gray-700">
-            ليس لديك حساب؟{" "}
-            <Link
-              to="/register"
-              className="text-yellow-500 hover:text-yellow-600 font-semibold"
-            >
-              إنشاء حساب جديد
-            </Link>
-          </p>
+        
         </form>
       </div>
     </div>
